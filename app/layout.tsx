@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 const RootLayout = ({children}: RootLayoutProperties) => {
   return (
     <html lang="en">
-      <body className={`bg-neutral-950 ${firaCode.className}`}>
+      <body className={firaCode.className}>
         {children}
       </body>
     </html>

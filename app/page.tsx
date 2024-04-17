@@ -33,7 +33,7 @@ const Bar = ({title, cols}: BarProperties) => {
 
 const charPool = [".", ",", "!", ";", ":", "~", "_", "-", "+", "*", "#", "@", "$", "%", "&", "(", ")", "[", "]", "{", "}", "<", ">", "?", "/", "|", "\\"];
 const lottery = 0.2;
-const targetChar = "T";
+const targetChars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
 const Line = ({cols, onUpdate}: LineProperties) => {
   const reservedChars = 4;
@@ -46,7 +46,7 @@ const Line = ({cols, onUpdate}: LineProperties) => {
         const targetPoint = Math.floor(Math.random() * newPoints.length);
         const newChar = Math.random() > lottery ? " " : charPool[Math.floor(Math.random() * charPool.length)];
 
-        if (newChar === " " && newPoints[targetPoint] === targetChar) {
+        if (newChar === " " && targetChars.includes(newPoints[targetPoint])) {
           return newPoints;
         }
 
@@ -60,14 +60,14 @@ const Line = ({cols, onUpdate}: LineProperties) => {
   }, []);
 
   useEffect(() => {
-    onUpdate(points.filter((point) => point === targetChar).length);
+    onUpdate(points.filter((point) => targetChars.includes(point)).length);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [points]);
 
   const handlePointClick = useCallback((i: number) => () => {
     setPoints((points) => {
       const newPoints = [...points];
-      newPoints[i] = targetChar;
+      newPoints[i] = targetChars[Math.floor(Math.random() * targetChars.length)];
 
       return newPoints;
     });
@@ -80,7 +80,7 @@ const Line = ({cols, onUpdate}: LineProperties) => {
       {points.map((point, i) => (
         <span 
           key={i} 
-          className={`${point === targetChar ? 'text-red-500 hover:bg-red-500 hover:text-red-950' : 'text-green-500 hover:bg-green-500 hover:text-green-950'} bg-neutral-950 cursor-none`}
+          className={`${targetChars.includes(point) ? 'text-red-500 hover:bg-red-500 hover:text-red-950' : 'text-green-500 hover:bg-green-500 hover:text-green-950'} cursor-none`}
           onClick={handlePointClick(i)}
         >
           {point}
@@ -109,19 +109,23 @@ const Home = () => {
   }, []);
 
   const targetHit = useMemo(() => lines.reduce((acc, line) => acc + line, 0) >= targetCount, [lines]);
+  const totalHits = useMemo(() => lines.reduce((acc, line) => acc + line, 0), [lines]);
+
+  const targetStr = `${targetCount}`.padStart(3, "0");
+  const totalStr = `${totalHits}`.padStart(3, "0");
 
   return (
-    <main className={`flex items-center justify-center h-screen text-[3vmin] ${targetHit ? 'text-red-500' : 'text-green-500'} transition-colors duration-500`}>
+    <main className={`bg-neutral-950 flex items-center justify-center h-screen text-[2vmin] ${targetHit ? 'text-red-500' : 'text-green-500'} transition-colors duration-500`}>
       <div className="text-center">
         <div
-          className="m-auto inline-grid gap-0 cursor-default select-none leading-[1.5]"
+          className="m-auto inline-grid gap-0 cursor-default select-none leading-[1.25]"
           style={{gridTemplateColumns: `repeat(${totalCols}, minmax(0, 1fr)`}}
         >
           <Bar title="tristo.dev" cols={totalCols}/>
           {lines.map((_, i) => (
             <Line key={i} cols={totalCols} onUpdate={handleLineUpdate(i)}/>
           ))}
-          <Bar title={targetHit ? "overflow" : "Stable"} cols={totalCols}/>
+          <Bar title={targetHit ? `unstable: ${totalStr}//${targetStr}` : `stable: ${totalStr}//${targetStr}`} cols={totalCols}/>
         </div>
         <div className={`mt-8 ${targetHit ? 'text-red-500' : 'text-green-500'} transition-colors duration-500`}>
           {targetHit ? "[ hello@tristo.dev - github.com/r3oath ]" : "[ #####@######.### - ######.###/###### ]"}
