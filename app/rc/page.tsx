@@ -146,6 +146,16 @@ export default function RC() {
 		toast('Record saved');
 	}, [recordLabel, requiredSubstance, requiredSubstanceUnit, standardMediumUnit, standardMediumVolume, standardSubstanceUnit, standardSubstanceVolume, targetUnit, targetVolume]);
 
+	const handleOptimise = useCallback(() => {
+		if (requiredSubstance !== undefined && requiredSubstance < 1 && requiredSubstanceUnit === 'l') {
+			setRequiredSubstanceUnit('ml');
+		}
+
+		if (requiredSubstance !== undefined && requiredSubstance >= 1000 && requiredSubstanceUnit === 'ml') {
+			setRequiredSubstanceUnit('l');
+		}
+	}, [requiredSubstance, requiredSubstanceUnit]);
+
 	const handleLoadRecord = useCallback((record: SavedRecord) => {
 		setStandardSubstanceVolume(record.standardSubstanceVolume);
 		setStandardSubstanceUnit(record.standardSubstanceUnit);
@@ -173,9 +183,6 @@ export default function RC() {
 			toast('Record deleted');
 		}
 	}, []);
-
-	console.log('recordsOpen', recordsOpen);
-
 
 	const hasValidRecord = useMemo(() => {
 		return requiredSubstance !== undefined && isNumber(requiredSubstance) && isUnit(requiredSubstanceUnit) && recordLabel !== undefined && recordLabel.length > 0;
@@ -237,9 +244,9 @@ export default function RC() {
 						<span className="font-black text-neutral-50">{isNumber(requiredSubstance) ? formatNumber(requiredSubstance) : 'XXX'}</span>
 						<span className="font-light ml-1 text-neutral-600">{isUnit(requiredSubstanceUnit) ? requiredSubstanceUnit : 'xx'}</span>
 					</div>
-					<div className="mt-4">
+					<div className="flex items-center mt-4 gap-2">
 						<Select value={requiredSubstanceUnit} onValueChange={handleRequiredSubstanceUnitChange}>
-							<SelectTrigger>
+							<SelectTrigger className="basis-2/3">
 								<SelectValue placeholder="Unit"/>
 							</SelectTrigger>
 							<SelectContent>
@@ -248,7 +255,11 @@ export default function RC() {
 								))}
 							</SelectContent>
 						</Select>
+						<Button className="basis-1/3" variant="outline" onClick={handleOptimise}>Optimise</Button>
 					</div>
+				</div>
+				<div className="mt-6 p-4 border border-neutral-800 rounded-lg">
+					<h2 className="text-lg">Actions</h2>
 					<Input className="mt-2" placeholder="Record label" value={recordLabel} onChange={handleRecordLabelChange}/>
 					<div className="mt-2 basis-1/2 flex items-stretch gap-2">
 						<Button className="basis-1/2" variant="default" onClick={handleSaveRecord} disabled={!hasValidRecord}>Save record</Button>
