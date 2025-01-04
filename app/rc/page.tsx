@@ -50,9 +50,11 @@ const convertToBase = (value: number, unit: Unit) => value * unitFactors[unit];
 
 const convertFromBase = (value: number, unit: Unit) => value / unitFactors[unit];
 
-const isNumber = (value: unknown) => typeof value === 'number' && !isNaN(value);
+const isNumber = (value: unknown): value is number => typeof value === 'number' && !isNaN(value);
 
 const isUnit = (value: unknown): value is Unit => units.includes(value as Unit);
+
+const formatNumber = (value: number) => Math.round((value + Number.EPSILON) * 1000) / 1000;
 
 export default function RC() {
 	const [standardSubstanceVolume, setStandardSubstanceVolume] = useState<string|undefined>();
@@ -64,6 +66,7 @@ export default function RC() {
 	const [requiredSubstanceUnit, setRequiredSubstanceUnit] = useState<Unit|undefined>();
 	const [recordLabel, setRecordLabel] = useState<string|undefined>();
 	const [records, setRecords] = useState<SavedRecord[]>([]);
+	const [recordsOpen, setRecordsOpen] = useState(false);
 
 	useEffect(() => {
 		const records = JSON.parse(localStorage.getItem('records') || '[]');
@@ -152,6 +155,7 @@ export default function RC() {
 		setTargetUnit(record.targetUnit);
 		setRequiredSubstanceUnit(record.requiredSubstanceUnit);
 		setRecordLabel(record.recordLabel);
+		setRecordsOpen(false);
 	}, []);
 
 	const handleDeleteRecord = useCallback((record: SavedRecord) => {
@@ -169,6 +173,9 @@ export default function RC() {
 			toast('Record deleted');
 		}
 	}, []);
+
+	console.log('recordsOpen', recordsOpen);
+
 
 	const hasValidRecord = useMemo(() => {
 		return requiredSubstance !== undefined && isNumber(requiredSubstance) && isUnit(requiredSubstanceUnit) && recordLabel !== undefined && recordLabel.length > 0;
@@ -227,7 +234,7 @@ export default function RC() {
 				<div className="mt-6 p-4 border border-neutral-800 rounded-lg">
 					<h2 className="text-lg">Required substance</h2>
 					<div className="mt-4 flex items-center text-6xl">
-						<span className="font-black text-neutral-50">{isNumber(requiredSubstance) ? requiredSubstance : 'XXX'}</span>
+						<span className="font-black text-neutral-50">{isNumber(requiredSubstance) ? formatNumber(requiredSubstance) : 'XXX'}</span>
 						<span className="font-light ml-1 text-neutral-600">{isUnit(requiredSubstanceUnit) ? requiredSubstanceUnit : 'xx'}</span>
 					</div>
 					<div className="mt-4">
@@ -245,7 +252,7 @@ export default function RC() {
 					<Input className="mt-2" placeholder="Record label" value={recordLabel} onChange={handleRecordLabelChange}/>
 					<div className="mt-2 basis-1/2 flex items-stretch gap-2">
 						<Button className="basis-1/2" variant="default" onClick={handleSaveRecord} disabled={!hasValidRecord}>Save record</Button>
-						<Sheet>
+						<Sheet open={recordsOpen} onOpenChange={setRecordsOpen}>
 							<SheetTrigger asChild>
 								<Button className="basis-1/2" variant="secondary">View records</Button>
 							</SheetTrigger>
