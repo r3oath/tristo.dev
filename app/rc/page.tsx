@@ -149,10 +149,12 @@ export default function RC() {
 	const handleOptimise = useCallback(() => {
 		if (requiredSubstance !== undefined && requiredSubstance < 1 && requiredSubstanceUnit === 'l') {
 			setRequiredSubstanceUnit('ml');
+			toast('Converted to milliliters');
 		}
 
 		if (requiredSubstance !== undefined && requiredSubstance >= 1000 && requiredSubstanceUnit === 'ml') {
 			setRequiredSubstanceUnit('l');
+			toast('Converted to liters');
 		}
 	}, [requiredSubstance, requiredSubstanceUnit]);
 
