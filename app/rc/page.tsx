@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-const units = ['ml', 'l'];
+const units = ['ml', 'l', 'sqm'] as const;
 
 type Unit = typeof units[number];
 
@@ -39,11 +39,13 @@ type SavedRecord = {
 const unitLabels: Record<Unit, string> = {
 	ml: 'Milliliters',
 	l: 'Liters',
+	sqm: 'Square meters',
 };
 
 const unitFactors: Record<Unit, number> = {
 	ml: 1,
 	l: 1000,
+	sqm: 1,
 };
 
 const convertToBase = (value: number, unit: Unit) => value * unitFactors[unit];
@@ -111,7 +113,8 @@ export default function RC() {
 	}, []);
 
 	const requiredSubstance = useMemo(() => {
-		if (standardSubstanceVolume === undefined || standardSubstanceUnit === undefined || standardMediumVolume === undefined || standardMediumUnit === undefined || targetVolume === undefined || targetUnit === undefined || requiredSubstanceUnit === undefined) {
+		if (standardSubstanceVolume === undefined || standardSubstanceUnit === undefined || standardMediumVolume === undefined
+				|| standardMediumUnit === undefined || targetVolume === undefined || targetUnit === undefined || requiredSubstanceUnit === undefined) {
 			return;
 		}
 
